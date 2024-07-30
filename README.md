@@ -15,3 +15,4 @@ For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 
+![maxwell-cat-rotating](https://github.com/user-attachments/assets/3f4b313a-6d14-4081-9476-fa3c3d9eaa41)
