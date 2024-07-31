@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-class MyHomePage extends StatefulWidget
+class ScrollviewPagination extends StatefulWidget
 {
-  const MyHomePage({super.key});
+  const ScrollviewPagination({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<ScrollviewPagination> createState() => _ScrollviewPaginationState();
 }
 
-class _MyHomePageState extends State<MyHomePage>
+class _ScrollviewPaginationState extends State<ScrollviewPagination>
 {
   final _url = "https://jsonplaceholder.typicode.com/albums";
   final int _limit = 20;
