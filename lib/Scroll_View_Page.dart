@@ -12,54 +12,77 @@ class MyHomePage extends StatefulWidget
 
 class _MyHomePageState extends State<MyHomePage>
 {
-  final ScrollController _scrollController = ScrollController();
-  List _data = [];
+  final _url = "https://jsonplaceholder.typicode.com/albums";
+  final int _limit = 20;
+  late ScrollController _controller;
+  List _albumList = [];
   int _page = 1;
   bool _isLoading = false;
-  bool _hasMoreData = false;
+  bool _hasMoreData = true;
+  bool _isFirstLoad = false;
+
 
   @override
   void initState()
   {
     super.initState();
-    _fetchData();
-    _scrollController.addListener((){
-      if (_scrollController.position.extentAfter < 300 && !_isLoading && _hasMoreData)
-      {
-        _fetchData();
-      }
-    });
+    initLoad();
+    _controller = ScrollController()..addListener(_nextLoad);
   }
 
-  Future<void> _fetchData() async
+  void initLoad() async
   {
     setState(() {
-      _isLoading = true;
+      _isFirstLoad = true;
     });
-    final response = await http.get(Uri.parse('https://jsonplaceholder.typicode.com/albums?_page=$_page&_limit=10'));
-    if(response.statusCode == 200)
+    try
     {
-      List newData = json.decode(response.body);
-      setState(()
+      final res = await http.get(Uri.parse("$_url?_page=$_page&_limit=$_limit"));
+      setState(() {
+        _albumList = jsonDecode(res.body);
+      });
+    }
+    catch(e)
+    {
+      print(e.toString());
+    }
+    setState(() {
+      _isFirstLoad = false;
+    });
+  }
+  
+  void _nextLoad() async
+  {
+    print("nextLoad");
+    if(_hasMoreData && !_isFirstLoad && !_isLoading && _controller.position.extentAfter < 100)
+    {
+      setState(() {
+        _isLoading = true;
+      });
+      _page += 1;
+      try
       {
-        _data.addAll(newData);
-        _isLoading = false;
-        if(newData.length < 10)
+        final res = await http.get(Uri.parse("$_url?_page=$_page&_limit=$_limit"));
+        final List fetchedAlbums = jsonDecode(res.body);
+        if(fetchedAlbums.isNotEmpty)
         {
-          _hasMoreData = false;
+          setState(() {
+            _albumList.addAll(fetchedAlbums);
+          });
         }
         else
         {
-          _page++;
+          setState(() {
+            _hasMoreData = false;
+          });
         }
-      });
-    }
-    else
-    {
-      setState(()
+      }
+      catch(e)
       {
+        print(e.toString());
+      }
+      setState(() {
         _isLoading = false;
-        _hasMoreData = false;
       });
     }
   }
@@ -68,20 +91,71 @@ class _MyHomePageState extends State<MyHomePage>
   void dispose()
   {
     super.dispose();
-    _scrollController.dispose();
+    _controller.removeListener(_nextLoad);
   }
 
   @override
   Widget build(BuildContext context)
   {
-    return _data.isEmpty && _isLoading
-    ? Center(child: CircularProgressIndicator()) : ListView.builder
+    return Scaffold
     (
-      itemCount: _data.length, itemBuilder: (context, index)
-      {
-        if (index == _data.length)
-      }
-    )
-
+      appBar: AppBar
+      (
+        title: const Text("test title"),
+      ),
+      body: _isFirstLoad ? const Center (child: CircularProgressIndicator(),)
+      : Column
+      (
+        children:
+        [
+          Expanded
+          (
+              child: ListView.builder
+              (
+                controller: _controller,
+                itemCount: _albumList.length,
+                itemBuilder: (context, index) => Card
+                (
+                  margin: const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+                  child: ListTile
+                  (
+                    title: Text(_albumList[index]["id"].toString()),
+                    subtitle: Text(_albumList[index]["title"]),
+                  ),
+                )
+              )
+          ),
+          if (_isLoading == true)
+          (
+            Container
+            (
+              padding: const EdgeInsets.all(30),
+              child: const Center
+              (
+                child: CircularProgressIndicator(),
+              ),
+            )
+          ),
+          if (_hasMoreData == false)
+          (
+            Container
+            (
+              padding: const EdgeInsets.all(20),
+              child: const Center
+              (
+                child: Text
+                (
+                  "No more data to be fetched",
+                  style: TextStyle
+                  (
+                    color: Colors.white
+                  ),
+                ),
+              ),
+            )
+          )
+        ],
+      )
+    );
   }
 }
