@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
-class MyHomePage extends StatefulWidget
+class AlignView extends StatefulWidget
 {
-  const MyHomePage({super.key});
+  const AlignView({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<AlignView> createState() => _AlignViewState();
 }
 
-class _MyHomePageState extends State<MyHomePage>
+class _AlignViewState extends State<AlignView>
 {
   @override
 
